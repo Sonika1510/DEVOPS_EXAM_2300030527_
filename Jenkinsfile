@@ -34,7 +34,7 @@ pipeline {
         // ===== BACKEND BUILD =====
         stage('Build Backend') {
             steps {
-                dir('backend-springboootapp') {
+                dir('backend-springbootapp') {
                     bat 'mvn clean package'
                 }
             }

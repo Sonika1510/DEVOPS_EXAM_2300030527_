@@ -8,6 +8,7 @@
 		<version>3.5.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+	
 	<groupId>com.klef</groupId>
 	<artifactId>backend-springbootapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -64,6 +65,7 @@
 	</dependencies>
 
 	<build>
+	<finalName>backend-spring</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

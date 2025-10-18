@@ -1,13 +1,16 @@
 pipeline {
     agent any
-
+     tools {
+        
+       jdk 'JAVA'     
+        maven 'MAVEN'   
+    }
     stages {
 
         // ===== FRONTEND BUILD =====
         stage('Build Frontend') {
             steps {
-                // Change the directory to the correct sub-folder
-                dir('FRONTEND/book-frontend') {
+                dir('frontend-reactapp') {
                     bat 'npm install'
                     bat 'npm run build'
                 }
@@ -18,12 +21,14 @@ pipeline {
         stage('Deploy Frontend to Tomcat') {
             steps {
                 bat '''
-                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement" (
-                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement"
+                echo Deleting old frontend from Tomcat...
+                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\frontend-reactapp" (
+                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\frontend-reactapp"
                 )
-                mkdir "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement"
-                // Change the source path to the new sub-folder
-                xcopy /E /I /Y FRONTEND\\book-frontend\\dist\\* "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement"
+                echo Creating new frontend folder...
+                mkdir "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\frontend-reactapp"
+                echo Copying new build files...
+                xcopy /E /I /Y reactfrontend\\dist\\* "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\frontend-reactapp\\"
                 '''
             }
         }
@@ -31,8 +36,8 @@ pipeline {
         // ===== BACKEND BUILD =====
         stage('Build Backend') {
             steps {
-                dir('BACKEND') {
-                    bat 'mvn clean package'
+                dir('backend-springbootapp') {
+                    bat 'mvn clean package -DskipTests'
                 }
             }
         }
@@ -41,13 +46,15 @@ pipeline {
         stage('Deploy Backend to Tomcat') {
             steps {
                 bat '''
-                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement.war" (
-                    del /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement.war"
+                echo Removing old backend WAR and folder...
+                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\backend-springbootapp.war" (
+                    del /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\backend-springbootapp.war"
                 )
-                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement" (
-                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\bookManagement"
+                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\backend-springbootapp" (
+                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\backend-springbootapp"
                 )
-                copy "BACKEND\\target\\*.war" "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\"
+                echo Copying new backend WAR file...
+                copy "springbootbackend\\target\\*.war" "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\"
                 '''
             }
         }
@@ -59,7 +66,7 @@ pipeline {
             echo 'Deployment Successful!'
         }
         failure {
-            echo 'Pipeline Failed.'
+            echo ' Pipeline Failed.'
         }
     }
 }
